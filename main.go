@@ -70,6 +70,7 @@ func main() {
 
 	http.Handle("/", securityHeaders(authCheck(rateLimitMiddleware(http.HandlerFunc(homeHandler)))))
 	http.Handle("/browse", securityHeaders(authCheck(rateLimitMiddleware(http.HandlerFunc(browseHandler)))))
+	http.Handle("/browse/", securityHeaders(authCheck(rateLimitMiddleware(http.HandlerFunc(browseHandler)))))
 	http.Handle("/download/", securityHeaders(authCheck(rateLimitMiddleware(http.HandlerFunc(downloadHandler)))))
 
 	go cleanupTokens()
@@ -156,10 +157,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	<title>Secure File Server</title>
 	<style>
 		body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-		.container { background-color: #f9f9f9; padding: 30px; border-radius: 8px; margin-top: 20px; }
-		.token { word-break: break-all; background-color: #e6f7ff; padding: 10px; margin: 15px 0; }
-		.btn { display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white;
-			text-decoration: none; border-radius: 4px; margin-top: 10px; }
+		.token { font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; }
+		.btn { display: inline-block; margin-top: 15px; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+		.btn:hover { background: #0069d9; }
 	</style>
 </head>
 <body>
@@ -172,7 +172,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		{{if .IsDir}}
 			<a href="/browse?token={{.Token}}" class="btn">Browse Files</a>
 		{{else}}
-			<a href="/download/{{.FileName}}?token={{.Token}}" class="btn">Download {{.FileName}}</a>
+			<a href="/download/{{.BaseName}}?token={{.Token}}" class="btn">Download {{.BaseName}}</a>
 		{{end}}
 	</div>
 </body>
@@ -182,15 +182,18 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Token    string
 		IsDir    bool
-		FileName string
+		BaseName string
 	}{
 		Token:    token,
 		IsDir:    isDirMode,
-		FileName: filepath.Base(basePath),
+		BaseName: filepath.Base(basePath),
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 func browseHandler(w http.ResponseWriter, r *http.Request) {
@@ -200,180 +203,47 @@ func browseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := template.Must(template.New("browse").Parse(`
-		<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-			<title>Browse Files</title>
-			<style>
-				:root {
-					--primary-color: #4361ee;
-					--secondary-color: #3f37c9;
-					--background-color: #f8f9fa;
-					--card-bg: #ffffff;
-					--text-color: #333333;
-					--text-light: #6c757d;
-					--border-radius: 8px;
-					--box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-					--transition: all 0.3s ease;
-				}
-
-				body {
-					font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-					max-width: 900px;
-					margin: 0 auto;
-					padding: 20px;
-					background-color: var(--background-color);
-					color: var(--text-color);
-					line-height: 1.6;
-				}
-
-				h1 {
-					color: var(--primary-color);
-					margin-bottom: 1rem;
-					font-weight: 600;
-				}
-
-				.current-dir {
-					background-color: var(--card-bg);
-					padding: 12px 16px;
-					border-radius: var(--border-radius);
-					box-shadow: var(--box-shadow);
-					margin-bottom: 20px;
-					font-size: 0.95rem;
-					border-left: 4px solid var(--primary-color);
-				}
-
-				.current-dir strong {
-					color: var(--secondary-color);
-					font-weight: 500;
-				}
-
-				.file-list {
-					margin-top: 25px;
-					background-color: var(--card-bg);
-					border-radius: var(--border-radius);
-					box-shadow: var(--box-shadow);
-					overflow: hidden;
-				}
-
-				.file-item {
-					padding: 14px 20px;
-					display: flex;
-					align-items: center;
-					transition: var(--transition);
-					border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-				}
-
-				.file-item:last-child {
-					border-bottom: none;
-				}
-
-				.file-item:hover {
-					background-color: rgba(67, 97, 238, 0.05);
-					transform: translateX(5px);
-				}
-
-				.file-icon {
-					margin-right: 12px;
-					font-size: 1.2rem;
-					width: 24px;
-					text-align: center;
-				}
-
-				.file-item a {
-					color: var(--text-color);
-					text-decoration: none;
-					flex-grow: 1;
-					transition: var(--transition);
-				}
-
-				.file-item a:hover {
-					color: var(--primary-color);
-				}
-
-				.file-size {
-					color: var(--text-light);
-					font-size: 0.85rem;
-					margin-left: auto;
-					font-family: 'Courier New', monospace;
-				}
-
-				.back-link {
-					display: inline-block;
-					margin-top: 25px;
-					padding: 10px 16px;
-					background-color: var(--primary-color);
-					color: white;
-					text-decoration: none;
-					border-radius: var(--border-radius);
-					transition: var(--transition);
-					font-weight: 500;
-				}
-
-				.back-link:hover {
-					background-color: var(--secondary-color);
-					transform: translateY(-2px);
-					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-				}
-
-				.back-link::before {
-					content: "←";
-					margin-right: 5px;
-				}
-
-				.empty-state {
-					text-align: center;
-					padding: 40px 20px;
-					color: var(--text-light);
-				}
-
-				/* Animation for empty state */
-				@keyframes fadeIn {
-					from { opacity: 0; transform: translateY(10px); }
-					to { opacity: 1; transform: translateY(0); }
-				}
-
-				.file-list {
-					animation: fadeIn 0.4s ease-out;
-				}
-
-				/* Responsive design */
-				@media (max-width: 768px) {
-					body {
-						padding: 15px;
-					}
-
-					.file-item {
-						padding: 12px 15px;
-					}
-				}
-			</style>
+	<title>Browse Files</title>
+	<style>
+		body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+		.current-dir { margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+		.file-list { margin: 20px 0; }
+		.file-item { padding: 8px 0; border-bottom: 1px solid #eee; }
+		.file-icon { margin-right: 10px; }
+		.file-size { float: right; color: #666; }
+		.empty-state { color: #666; font-style: italic; }
+		.back-link { display: inline-block; margin-top: 20px; color: #007bff; text-decoration: none; }
+		.back-link:hover { text-decoration: underline; }
+	</style>
 </head>
 <body>
-			<h1>Available Files</h1>
-			<div class="current-dir">
-				Current directory: <strong>{{.CurrentDir}}</strong>
-			</div>
+	<h1>Available Files</h1>
+	<div class="current-dir">
+		Current directory: <strong>{{.CurrentDir}}</strong>
+	</div>
 
-			<div class="file-list">
-				{{if .Files}}
-					{{range .Files}}
-					<div class="file-item">
-						<span class="file-icon">{{if .IsDir}}📁{{else}}📄{{end}}</span>
-						<a href="{{if .IsDir}}/browse/{{.Name}}?token={{$.Token}}{{else}}/download/{{.Name}}?token={{$.Token}}{{end}}">
-							{{.Name}}{{if .IsDir}}/{{end}}
-						</a>
-						{{if not .IsDir}}<span class="file-size">{{.Size}}</span>{{end}}
-					</div>
-					{{end}}
-				{{else}}
-					<div class="empty-state">
-						This directory is empty
-					</div>
-				{{end}}
+	<div class="file-list">
+		{{if .Files}}
+			{{range .Files}}
+			<div class="file-item">
+				<span class="file-icon">{{if .IsDir}}📁{{else}}📄{{end}}</span>
+				<a href="{{if .IsDir}}/browse/{{.Name}}?token={{$.Token}}{{else}}/download/{{.Name}}?token={{$.Token}}{{end}}">
+					{{.Name}}{{if .IsDir}}/{{end}}
+				</a>
+				{{if not .IsDir}}<span class="file-size">{{.Size}}</span>{{end}}
 			</div>
+			{{end}}
+		{{else}}
+			<div class="empty-state">
+				This directory is empty
+			</div>
+		{{end}}
+	</div>
 
-			<a href="/?token={{.Token}}" class="back-link">Back to Home</a>
+	<a href="/?token={{.Token}}" class="back-link">Back to Home</a>
 </body>
 </html>
 `))
@@ -422,10 +292,38 @@ func browseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	// For single file mode
+	if !isDirMode {
+		fileInfo, err := secureStat(basePath)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		file, err := secureOpen(basePath)
+		if err != nil {
+			http.Error(w, "Access denied", http.StatusForbidden)
+			return
+		}
+		defer file.Close()
+
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filepath.Base(basePath)))
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+		w.Header().Set("Cache-Control", "no-store")
+
+		http.ServeContent(w, r, fileInfo.Name(), fileInfo.ModTime(), file)
+		return
+	}
+
+	// For directory mode
 	requestedPath := strings.TrimPrefix(r.URL.Path, "/download/")
 	cleanPath, err := securePath(basePath, requestedPath)
 	if err != nil {

@@ -1,8 +1,0 @@
-2025/04/13 23:27:59 main.go:30: 
-
-=== Server starting at Sun, 13 Apr 2025 23:27:59 IST ===
-2025/04/13 23:27:59 main.go:31: Working directory: /home/pavan/programming/experiments/gofileserver
-2025/04/13 23:27:59 main.go:32: Arguments: [go.mod]
-2025/04/13 23:27:59 main.go:33: File permissions:
--rw-r--r--  UID:1000  GID:1000  Size:3187
-2025/04/13 23:27:59 main.go:92: Server listening on :8000
