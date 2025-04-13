@@ -33,7 +33,7 @@ var (
 )
 
 func main() {
-	port := ":8080"
+	port := ":8090"
 	args := os.Args[1:]
 
 	if len(args) == 0 {
@@ -83,7 +83,7 @@ func main() {
 
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'none'")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'none'")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
@@ -151,30 +151,226 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	authTokens[token] = time.Now().Add(authTokenValidity)
 
 	tmpl := template.Must(template.New("home").Parse(`
-<!DOCTYPE html>
-<html>
+		<!DOCTYPE html>
+<html lang="en">
 <head>
-	<title>Secure File Server</title>
-	<style>
-		body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-		.token { font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; }
-		.btn { display: inline-block; margin-top: 15px; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-		.btn:hover { background: #0069d9; }
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure File Server | Cloud Storage</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --radius: 0.5rem;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-display {
+            margin: 1.5rem 0;
+        }
+
+        .token-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .token {
+            font-family: monospace;
+            background-color: #f1f5f9;
+            padding: 1rem;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary);
+            word-break: break-all;
+            position: relative;
+        }
+
+        .token::after {
+            content: "🔒";
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .expiry-notice {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 1rem 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .actions {
+            margin: 2rem 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-browse::before {
+            content: "📁";
+            margin-right: 0.5rem;
+        }
+
+        .btn-download::before {
+            content: "⬇️";
+            margin-right: 0.5rem;
+        }
+
+        .docs {
+            margin-top: 2.5rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: var(--radius);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+
+        .github-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-	<h1>Secure File Access</h1>
-	<div class="container">
-		<p>Your secure access token:</p>
-		<div class="token">{{.Token}}</div>
-		<p>This token will expire in 1 hour.</p>
+    <div class="container">
+        <header>
+            <h1>Secure File Server v1.0</h1>
+            <div>🔐 Secure file sharing</div>
+        </header>
 
-		{{if .IsDir}}
-			<a href="/browse?token={{.Token}}" class="btn">Browse Files</a>
-		{{else}}
-			<a href="/download/{{.BaseName}}?token={{.Token}}" class="btn">Download {{.BaseName}}</a>
-		{{end}}
-	</div>
+        <div class="token-display">
+            <span class="token-label">Your secure access token</span>
+            <div class="token">{{.Token}}</div>
+        </div>
+
+        <p class="expiry-notice">
+            <span>⏳ This token will expire in 1 hour</span>
+        </p>
+
+        <div class="actions">
+            {{if .IsDir}}
+                <a href="/browse?token={{.Token}}" class="btn btn-browse">Browse Files</a>
+            {{else}}
+                <a href="/download/{{.BaseName}}?token={{.Token}}" class="btn btn-download">Download {{.BaseName}}</a>
+            {{end}}
+        </div>
+
+        <div class="docs">
+            <h2>Documentation</h2>
+
+            <h3>Usage</h3>
+            <p>To serve a single file:</p>
+            <pre>fileserver &lt;filepath&gt;</pre>
+
+            <p>To serve a directory:</p>
+            <pre>fileserver --dir &lt;directorypath&gt;</pre>
+
+            <p>The server will start on port 8000. Access the web interface at:</p>
+            <pre>http://localhost:8000</pre>
+
+            <h3>Security Features</h3>
+            <ul>
+                <li>Uses temporary access tokens</li>
+                <li>Protected against path traversal attacks</li>
+                <li>Request size limited to prevent abuse</li>
+            </ul>
+
+            <a href="https://github.com/pavandhadge/goFileShare" class="github-link">
+                <svg height="16" viewBox="0 0 16 16" width="16" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+                View on GitHub
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        Secure Local File Server
+    </footer>
 </body>
 </html>
 `))
