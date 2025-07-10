@@ -1,15 +1,54 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/pavandhadge/goFileShare/server"
 	"github.com/pavandhadge/goFileShare/handlers"
 )
+
+// CloudinaryConfig holds credentials
+type CloudinaryConfig struct {
+	CloudName string `json:"cloud_name"`
+	APIKey    string `json:"api_key"`
+	APISecret string `json:"api_secret"`
+}
+
+func getCloudinaryConfigPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "cloudinary.json" // fallback to local dir
+	}
+	return filepath.Join(home, ".gofileserver_cloudinary.json")
+}
+
+func saveCloudinaryConfig(cfg CloudinaryConfig) error {
+	path := getCloudinaryConfigPath()
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return json.NewEncoder(f).Encode(cfg)
+}
+
+func loadCloudinaryConfig() (CloudinaryConfig, error) {
+	path := getCloudinaryConfigPath()
+	f, err := os.Open(path)
+	if err != nil {
+		return CloudinaryConfig{}, err
+	}
+	defer f.Close()
+	var cfg CloudinaryConfig
+	err = json.NewDecoder(f).Decode(&cfg)
+	return cfg, err
+}
 
 func main() {
 	port := ":8090"
@@ -30,6 +69,22 @@ func main() {
 
 	if len(flag.Args()) == 0 {
 		log.Fatal("Usage: ./server [--duration 3h] [--dir] <path> or ./server [--duration 3h] [--cloud --cloud-name <name> --cloud-key <key> --cloud-secret <secret>] <file>")
+	}
+
+	// Use cloudMode directly for the credential logic
+	if cloudMode {
+		if cloudName == "" || cloudKey == "" || cloudSecret == "" {
+			// Try to load from config file
+			cfg, err := loadCloudinaryConfig()
+			if err == nil && cfg.CloudName != "" && cfg.APIKey != "" && cfg.APISecret != "" {
+				cloudName, cloudKey, cloudSecret = cfg.CloudName, cfg.APIKey, cfg.APISecret
+			} else {
+				log.Fatal("Cloudinary credentials required for --cloud. Provide via flags or set up ~/.gofileserver_cloudinary.json")
+			}
+		} else {
+			// Save to config for future use
+			saveCloudinaryConfig(CloudinaryConfig{cloudName, cloudKey, cloudSecret})
+		}
 	}
 
 	shareDuration, err := time.ParseDuration(durationStr)
