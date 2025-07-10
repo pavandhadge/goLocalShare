@@ -24,6 +24,7 @@ const BrowsePage: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [redirected, setRedirected] = useState(false);
 
   // Extract path from location
   const getPathFromLocation = () => {
@@ -72,8 +73,12 @@ const BrowsePage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchFiles();
-  }, [currentPath, isAuthenticated]);
+    if (!isAuthenticated && !redirected) {
+      setRedirected(true);
+      // Only redirect once
+      navigate('/auth');
+    }
+  }, [isAuthenticated, redirected, navigate]);
 
   const handleRefresh = () => {
     fetchFiles();
