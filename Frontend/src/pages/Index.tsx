@@ -32,7 +32,7 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       {/* Hero Section with professional color scheme */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
+      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg max-h-[75vh]">
         <div className="container mx-auto px-4 py-24 md:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
@@ -101,11 +101,11 @@ const Index: React.FC = () => {
           <p className="text-lg text-gray-600 text-center max-w-2xl mx-auto mb-16">
             Our tool makes sharing files simple and secure.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-4 bg-blue-50 rounded-2xl shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-4 rounded-2xl ">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="border-none shadow-md hover:shadow-2xl transition-all duration-300 group overflow-hidden rounded-xl bg-white/90 hover:bg-blue-50/80"
+                className="border border-blue-200 shadow-lg hover:shadow-2xl transition-all duration-300 group overflow-hidden rounded-xl bg-white/80 backdrop-blur-md hover:bg-blue-100/70"
               >
                 <CardHeader className="pb-2 relative">
                   <div className="absolute -right-8 -top-8 bg-blue-100 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -182,45 +182,47 @@ const Index: React.FC = () => {
                 </div>
                 <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm shadow">
                   <p className="text-gray-400"># Upload a file to Cloudinary for 1 hour</p>
+                  <p className="text-gray-400"># First time only: add --cloud-name, --cloud-key, --cloud-secret</p>
                   <p>./goLocalShare --cloud --duration 1h /path/to/your/file.ext</p>
+                  <p className="text-gray-400"># Example (first time):</p>
+                  <p>./goLocalShare --cloud --cloud-name &lt;name&gt; --cloud-key &lt;key&gt; --cloud-secret &lt;secret&gt; --duration 1h /path/to/your/file.ext</p>
                 </div>
               </div>
             </div>
-            <div className="h-full flex flex-col justify-center">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-8 rounded-2xl shadow-lg h-full flex flex-col justify-center">
-                <h3 className="text-2xl font-bold mb-4 text-blue-700">Lightning Fast Setup</h3>
-                <ol className="space-y-4">
-                  <li className="flex gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                      1
-                    </div>
-                    <div>
-                      <p className="font-medium">
-                        Download the binary or build from source
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                      2
-                    </div>
-                    <div>
-                      <p className="font-medium">Run the server command</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                      3
-                    </div>
-                    <div>
-                      <p className="font-medium">
-                        Share the link with anyone on your network
-                      </p>
-                    </div>
-                  </li>
-                </ol>
-              </div>
-            </div>
+            <div className="h-full flex flex-col justify-center p-0">
+  <div className="relative bg-gradient-to-br from-blue-100 to-blue-50 p-8 rounded-2xl shadow-lg h-full flex flex-col justify-center">
+    <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow-inner">
+      <h3 className="text-2xl font-bold mb-6 text-blue-700">Lightning Fast Setup</h3>
+      <ol className="space-y-5">
+        <li className="flex gap-4 items-start">
+          <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+            1
+          </div>
+          <p className="font-medium">
+            Download the binary or build from source
+          </p>
+        </li>
+        <li className="flex gap-4 items-start">
+          <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+            2
+          </div>
+          <p className="font-medium">
+            Run the server command
+          </p>
+        </li>
+        <li className="flex gap-4 items-start">
+          <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+            3
+          </div>
+          <p className="font-medium">
+            Share the link + token with anyone on your network
+          </p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+
           </div>
         </div>
       </section>
