@@ -377,16 +377,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     .container { max-width: 520px; margin: 3.5rem auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px #0002; padding: 2.7rem 2.2rem; }
     .title { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.7rem; }
     .instructions { color: #475569; font-size: 1.09rem; margin-bottom: 1.7rem; line-height: 1.7; }
-    .token-box { background: #f1f5f9; border-radius: 7px; padding: 1.1rem 1rem; font-size: 1.08rem; font-family: monospace; color: #2563eb; margin-bottom: 1.2rem; word-break: break-all; display: flex; align-items: center; }
+    .token-box { background: #f1f5f9; border-radius: 7px; padding: 1.1rem 1rem; font-size: 1.08rem; font-family: monospace; color: #2563eb; margin-bottom: 1.2rem; word-break: break-all; display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
     .label { color: #64748b; font-size: 0.98rem; margin-bottom: 0.3rem; display: block; }
     .reset-btn { background: #dc2626; color: #fff; border: none; border-radius: 6px; padding: 0.7rem 1.2rem; font-size: 1.08rem; cursor: pointer; font-weight: 500; transition: background 0.15s; margin-top: 0.7rem; }
     .reset-btn:hover, .reset-btn:focus { background: #b91c1c; }
-    .copy-btn { background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 0.5rem 1rem; font-size: 1.02rem; cursor: pointer; font-weight: 500; margin-left: 1rem; transition: background 0.15s; }
+    .copy-btn { background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 0.5rem 1.1rem; font-size: 1.02rem; cursor: pointer; font-weight: 500; transition: background 0.15s; outline: none; box-shadow: 0 1px 4px #0001; }
     .copy-btn:hover, .copy-btn:focus { background: #059669; }
     .copy-feedback { color: #10b981; font-size: 0.98rem; margin-left: 0.7rem; transition: opacity 0.2s; }
     .user-link { display: inline-block; margin-top: 1.5rem; color: #2563eb; text-decoration: underline; font-size: 1.08rem; font-weight: 500; transition: color 0.15s; }
     .user-link:hover { color: #1d4ed8; }
-    @media (max-width: 600px) { .container { padding: 1.1rem 0.5rem; } .token-box { flex-direction: column; align-items: flex-start; } .copy-btn { margin-left: 0; margin-top: 0.7rem; } }
+    @media (max-width: 600px) {
+      .container { padding: 1.1rem 0.5rem; }
+      .token-box { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+      .copy-btn, .copy-feedback { margin-left: 0; }
+    }
   </style>
 </head>
 <body>
