@@ -1,101 +1,155 @@
-# Secure File Server
+[📚 Full Documentation](./docs/README.md)
 
-A secure HTTP server for sharing files and directories with authentication and rate limiting.
+# goLocalShare
 
-## Features
+A simple, secure, and fast file sharing server for your local network or the cloud.
 
-- **Secure file sharing**: Share single files or entire directories
-- **Authentication**: Time-limited access tokens (valid for 1 hour)
-- **Rate limiting**: Protection against brute force attacks
-- **Security headers**: CSP, XSS protection, no-sniff, etc.
-- **Path sanitization**: Protection against directory traversal attacks
-- **Two modes**:
-  - Single file mode (direct download link)
-  - Directory mode (browsable interface)
+---
 
-## Installation
+## 🚀 What is goLocalShare?
 
-1. Ensure you have Go installed (version 1.16+ recommended)
-2. Clone or download the repository
-3. Build the binary:
-   ```sh
-   go build -o server
-   ```
+goLocalShare lets you share files or directories from your computer with anyone on your local network (or via a cloud link) in seconds. It’s designed for privacy, security, and ease of use—no accounts, no setup, just a single command.
 
-## Usage
+---
 
-### For a single file:
+## ✨ Features
+
+- **Easy File & Directory Sharing:** Share any file or folder instantly with a single command.
+- **Secure Token Authentication:** Only users with your unique, time-limited token can access your files.
+- **Time-limited Sessions:** Access automatically expires after your chosen duration (default: 1 hour).
+- **Cloud Upload & Auto-Delete:** Optionally upload files to Cloudinary for remote sharing. Files are deleted from the cloud after your session ends.
+- **Strong Security:**
+  - CSP, XSS, and other secure HTTP headers
+  - Path and symlink protection
+  - Rate limiting and brute-force protection
+- **No Size Limit:** Share files of any size (limited only by your network or Cloudinary plan).
+- **Cross-platform:** Works on Linux, Windows, and macOS.
+
+---
+
+## 🛠️ Installation
+
+### 1. Download a Release
+- Go to [Releases](https://github.com/pavandhadge/goLocalShare/releases) and download the binary for your OS.
+- Or, use the build script to cross-compile for any platform:
+
 ```sh
-./server /path/to/your/file.ext
+./build.sh
 ```
 
-### For a directory:
+### 2. Build from Source (requires Go 1.16+)
+
 ```sh
-./server --dir /path/to/your/directory
+git clone https://github.com/pavandhadge/goLocalShare.git
+cd goLocalShare
+go build -o goLocalShare main.go
 ```
 
-The server will start on `http://localhost:8080`
+---
 
-## Access Control
+## ⚡ Usage
 
-- Upon visiting the homepage (`/`), you'll receive an access token
-- This token is valid for 1 hour
-- All subsequent requests require this token either:
-  - As a URL parameter (`?token=...`)
-  - Or in the `X-Auth-Token` header
+### Share a Single File for 2 Hours
+```sh
+./goLocalShare --duration 2h /path/to/your/file.ext
+```
 
-## Security Features
+### Share a Directory for 30 Minutes
+```sh
+./goLocalShare --dir --duration 30m /path/to/your/directory
+```
 
-- **Rate limiting**: 100 requests per minute per IP
-- **Brute force protection**: 2-second delay after failed auth attempts
-- **Secure headers**: CSP, XSS protection, no-sniff, etc.
-- **Path sanitization**: Prevents directory traversal attacks
-- **Symlink protection**: Blocks symlinks that point outside the base directory
+### Upload a File to Cloudinary for 1 Hour
+- **First time only:** Add your Cloudinary credentials with `--cloud-name`, `--cloud-key`, and `--cloud-secret`.
+- Credentials are saved in `~/.gofileserver_cloudinary.json` for future use.
 
-## API Endpoints
+```sh
+./goLocalShare --cloud --cloud-name <name> --cloud-key <key> --cloud-secret <secret> --duration 1h /path/to/your/file.ext
+```
+- **Next time:** Just use `--cloud` (credentials are loaded automatically):
+```sh
+./goLocalShare --cloud --duration 1h /path/to/your/file.ext
+```
 
-| Endpoint       | Description                                                                 |
-|----------------|-----------------------------------------------------------------------------|
-| `/`            | Homepage - displays access token and appropriate download/browse link       |
-| `/browse`      | Directory listing (directory mode only)                                     |
-| `/browse/`     | Subdirectory listing (directory mode only)                                  |
-| `/download/`   | File download endpoint (works for both single file and directory modes)     |
+---
 
-## Technical Details
+## 🔒 Security Details
 
-- **Port**: 8080 (hardcoded)
-- **Token length**: 32 bytes (hex encoded)
-- **Token validity**: 1 hour
-- **Rate limit**: 100 requests/minute
-- **Request size limit**: 10MB
-- **Timeouts**:
-  - Read/Write: 15 seconds
-  - Idle: 30 seconds
+- **Token Authentication:**
+  - Each session generates a unique access token.
+  - Only users with the token can browse or download files.
+  - Token is valid for the session duration (default: 1 hour).
+- **Rate Limiting:** 100 requests/minute per IP.
+- **Brute-force Protection:** 2-second delay after failed attempts.
+- **Security Headers:** CSP, XSS, no-sniff, and more.
+- **Path & Symlink Protection:** Only files within the shared path are accessible.
+- **Session Expiry:** All access is revoked after the session ends.
 
-## Building from Source
+---
 
-1. Ensure you have Go installed
-2. Clone the repository
-3. Build:
-   ```sh
-   go build -o server
-   ```
+## 🌐 How It Works
 
-## License
+1. **Start the server:** Run the command with your file or directory.
+2. **Get the link and token:** The server prints a link and a unique token.
+3. **Share with others:** Give the link and token to anyone on your network.
+4. **Access:** Users enter the token to browse/download files.
+5. **Session ends:** After the duration, access is automatically revoked.
 
-This project is open-source. Feel free to use and modify it according to your needs.
+---
 
-## Security Considerations
+## ☁️ Cloud Upload (Cloudinary)
 
-- Always run behind a reverse proxy in production
-- Consider adding TLS/HTTPS
-- The server binds to all interfaces by default - restrict as needed
-- Tokens are stored in memory and cleared after expiration
+- Use `--cloud` to upload a file to Cloudinary for remote sharing.
+- File is deleted from Cloudinary after the session duration.
+- Credentials are stored in `~/.gofileserver_cloudinary.json` after first use.
+- You can update credentials by re-running with the flags.
 
-## Known Limitations
+---
 
-- No persistent user accounts - tokens are temporary
-- No upload functionality - read-only server
-- Basic UI - functional but minimal styling
+## 🖥️ API Endpoints (for advanced users)
 
-For any issues or feature requests, please open an issue on the repository.
+| Endpoint         | Description                                 |
+|------------------|---------------------------------------------|
+| `/`              | Owner panel: shows your access token         |
+| `/token`         | User page: enter token to access files       |
+| `/api/files`     | List files/directories (requires token)      |
+| `/api/download/` | Download a file (requires token)             |
+
+---
+
+## 🧩 Troubleshooting
+
+- **Port in use?** The server uses port 8090 by default. Stop other services or change the port in `main.go` if needed.
+- **Cloudinary errors?** Double-check your credentials. Delete `~/.gofileserver_cloudinary.json` to reset.
+- **Token not working?** Make sure you’re using the latest token and the session hasn’t expired.
+- **Firewall issues?** Ensure port 8090 is open on your network.
+
+---
+
+## 📝 License
+
+MIT. Free for personal and commercial use. Contributions welcome!
+
+---
+
+## 🙋 FAQ
+
+**Q: Can I share with people outside my local network?**
+- Yes, if your network/firewall allows, or by using the Cloudinary upload feature.
+
+**Q: Are my files ever stored on a third-party server?**
+- Only if you use `--cloud`. Otherwise, files stay on your machine.
+
+**Q: How do I revoke access immediately?**
+- Use the "Reset Token" button on the owner panel (`/`).
+
+**Q: Is there a web UI?**
+- Yes, a minimal web UI is provided for both owners and users.
+
+---
+
+## 👨‍💻 Author
+
+Made with ❤️ by [Pavan Dhadge](https://github.com/pavandhadge)
+
+For issues or suggestions, open an [issue](https://github.com/pavandhadge/goLocalShare/issues) or [pull request](https://github.com/pavandhadge/goLocalShare/pulls).
