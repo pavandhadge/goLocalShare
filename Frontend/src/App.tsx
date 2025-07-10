@@ -1,10 +1,16 @@
 
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import React from "react";
+import Documentation from "./pages/Documentation";
 
 
 function App() {
-  return <Index />;
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/documentation" element={<Documentation />} />
+    </Routes>
+  );
 }
 
 export default App;

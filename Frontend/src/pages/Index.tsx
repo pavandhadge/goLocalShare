@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DocumentationButton } from "./Documentation";
 
 const Index: React.FC = () => {
   // GitHub username to be prominently displayed
@@ -74,6 +75,7 @@ const Index: React.FC = () => {
                 <Github size={20} />
                 GitHub
               </Button>
+              <DocumentationButton className="!px-4 !py-2 !rounded-lg !font-semibold !shadow-md !bg-blue-600 !text-white hover:!bg-blue-700" />
             </div>
           </div>
         </div>
@@ -291,6 +293,7 @@ const Index: React.FC = () => {
               <Github size={20} />
               View on GitHub
             </Button>
+            <DocumentationButton className="ml-2" />
           </div>
         </div>
       </section>
@@ -305,6 +308,7 @@ const Index: React.FC = () => {
             </div>
             <div className="text-sm">
               <p>A simple, secure file sharing solution.</p>
+              {/* <DocumentationButton className="ml-2" /> */}
             </div>
             <div className="flex items-center mt-6 md:mt-0">
               <Button
