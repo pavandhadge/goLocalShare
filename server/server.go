@@ -15,18 +15,21 @@ const (
 	timeout = 15 * time.Second
 )
 
-func Start(port, basePath string, isDirMode, isCloudMode bool, shareDuration time.Duration) {
+func Start(port, basePath string, isDirMode, isCloudMode bool, shareDuration time.Duration, cloudName, cloudKey, cloudSecret string) {
 	if _, err := utils.SecureStat(basePath); err != nil {
 		log.Fatalf("Path error: %v", err)
 	}
 
 	if isCloudMode {
-		url, err := utils.UploadToCloudinary(basePath)
+		if cloudName == "" || cloudKey == "" || cloudSecret == "" {
+			log.Fatal("Cloudinary credentials are required in cloud mode. Use --cloud-name, --cloud-key, --cloud-secret.")
+		}
+		url, err := utils.UploadToCloudinary(basePath, cloudName, cloudKey, cloudSecret, shareDuration)
 		if err != nil {
 			log.Fatalf("Failed to upload to Cloudinary: %v", err)
 		}
 		fmt.Printf("File uploaded to Cloudinary. URL: %s\n", url)
-		fmt.Println("This URL will be automatically deleted in 1 hour.")
+		fmt.Printf("This URL will be automatically deleted in %s.\n", shareDuration)
 		return
 	}
 

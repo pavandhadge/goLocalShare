@@ -12,13 +12,10 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-func UploadToCloudinary(filePath string) (string, error) {
-	cloudName := "du1jbnyp0"
-	apiKey := "476468415943614"
-	apiSecret := "RjmUy0N30VGpxpKM6TnXRZyUCFs"
-
+// UploadToCloudinary uploads a file to Cloudinary using user credentials and deletes it after the given duration.
+func UploadToCloudinary(filePath, cloudName, apiKey, apiSecret string, duration time.Duration) (string, error) {
 	if cloudName == "" || apiKey == "" || apiSecret == "" {
-		return "", fmt.Errorf("Cloudinary credentials not set in environment variables")
+		return "", fmt.Errorf("Cloudinary credentials not set")
 	}
 
 	cld, err := cloudinary.NewFromParams(cloudName, apiKey, apiSecret)
@@ -47,8 +44,9 @@ func UploadToCloudinary(filePath string) (string, error) {
 		return "", fmt.Errorf("upload failed: %v", err)
 	}
 
+	// Delete the file after the specified duration
 	go func(publicID string) {
-		time.Sleep(1 * time.Hour)
+		time.Sleep(duration)
 		_, err := cld.Upload.Destroy(ctx, uploader.DestroyParams{
 			PublicID: publicID,
 			Type:     "upload",

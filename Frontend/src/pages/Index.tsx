@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -24,11 +24,15 @@ import {
 const Index: React.FC = () => {
   // GitHub username to be prominently displayed
   const githubUsername = "pavandhadge/goLocalShare";
+  // Session duration (static for now)
+  const sessionDuration = "1 hour";
+  // Token system description
+  const tokenDescription = "Access is protected by a time-limited token. Only users with the correct token can browse or download files during the session.";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       {/* Hero Section with professional color scheme */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-24 md:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
@@ -36,13 +40,13 @@ const Index: React.FC = () => {
               <img
                 src="/go-gopher-svgrepo-com.svg"
                 alt="Go Gopher Mascot"
-                className="h-32 w-32 animate-bounce"
+                className="h-32 w-32 animate-bounce drop-shadow-xl"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
               goLocalShare
             </h1>
-            <p className="text-xl md:text-2xl mb-10 text-blue-100">
+            <p className="text-2xl md:text-3xl mb-10 text-blue-100 font-medium">
               Share files securely across your local network in seconds
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -54,7 +58,7 @@ const Index: React.FC = () => {
                   )
                 }
                 size="lg"
-                className="gap-2 bg-white text-blue-600 hover:bg-blue-50"
+                className="gap-2 bg-white text-blue-600 hover:bg-blue-50 shadow-md"
               >
                 <Download size={20} />
                 Download
@@ -62,7 +66,7 @@ const Index: React.FC = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="gap-2 border-white text-black hover:bg-white/10"
+                className="gap-2 border-white text-black hover:bg-white/10 shadow-md"
                 onClick={() =>
                   window.open(`https://github.com/${githubUsername}`, "_blank")
                 }
@@ -73,7 +77,6 @@ const Index: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Wave separator */}
         <div className="relative h-16 md:h-24 bg-gradient-to-r from-blue-600 to-blue-700">
           <svg
@@ -89,29 +92,27 @@ const Index: React.FC = () => {
         </div>
       </header>
 
-      {/* Subtle Features Section with Cards */}
-      <section className="py-20 bg-gray-50">
+      {/* Features Section */}
+      <section className="py-24 bg-white border-b border-blue-100">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-blue-700 tracking-tight">
             What It Does
           </h2>
           <p className="text-lg text-gray-600 text-center max-w-2xl mx-auto mb-16">
             Our tool makes sharing files simple and secure.
           </p>
-
-          {/* Features in a more subtle presentation */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-4 bg-blue-50 rounded-2xl shadow-xl">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="border-none shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden"
+                className="border-none shadow-md hover:shadow-2xl transition-all duration-300 group overflow-hidden rounded-xl bg-white/90 hover:bg-blue-50/80"
               >
                 <CardHeader className="pb-2 relative">
                   <div className="absolute -right-8 -top-8 bg-blue-100 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="mb-4 text-blue-500 relative z-10">
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl relative z-10">
+                  <CardTitle className="text-2xl font-bold relative z-10 text-blue-800">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
@@ -127,12 +128,12 @@ const Index: React.FC = () => {
       </section>
 
       {/* GitHub Focus Section - NEW */}
-      <section className="py-16 bg-blue-50">
+      <section className="py-20 bg-blue-50 border-b border-blue-100">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <Github className="h-16 w-16 mx-auto mb-6 text-blue-600" />
-            <h2 className="text-3xl font-bold mb-6">Open Source on GitHub</h2>
-            <p className="text-lg mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-700">Open Source on GitHub</h2>
+            <p className="text-lg mb-8 text-blue-900">
               This project is completely open source. Check out the code,
               contribute, or report issues on GitHub.
             </p>
@@ -146,7 +147,7 @@ const Index: React.FC = () => {
             </div>
             <Button
               size="lg"
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
+              className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md"
               onClick={() =>
                 window.open(`https://github.com/${githubUsername}`, "_blank")
               }
@@ -159,11 +160,11 @@ const Index: React.FC = () => {
       </section>
 
       {/* Usage Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white border-b border-blue-100">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <div className="h-full flex flex-col justify-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-700">
                 Simple to Use
               </h2>
               <p className="text-lg text-gray-600 mb-8">
@@ -171,48 +172,54 @@ const Index: React.FC = () => {
                 CLI tool.
               </p>
               <div className="space-y-4">
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm">
-                  <p className="text-gray-400"># Share a single file</p>
-                  <p>./goLocalShare /path/to/your/file.ext</p>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm shadow">
+                  <p className="text-gray-400"># Share a single file for 2 hours</p>
+                  <p>./goLocalShare --duration 2h /path/to/your/file.ext</p>
                 </div>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm">
-                  <p className="text-gray-400"># Share a directory</p>
-                  <p>./goLocalShare --dir /path/to/your/directory</p>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm shadow">
+                  <p className="text-gray-400"># Share a directory for 30 minutes</p>
+                  <p>./goLocalShare --dir --duration 30m /path/to/your/directory</p>
+                </div>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-md font-mono text-sm shadow">
+                  <p className="text-gray-400"># Upload a file to Cloudinary for 1 hour</p>
+                  <p>./goLocalShare --cloud --duration 1h /path/to/your/file.ext</p>
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-8 rounded-2xl shadow-lg">
-              <h3 className="text-2xl font-bold mb-4">Lightning Fast Setup</h3>
-              <ol className="space-y-4">
-                <li className="flex gap-3">
-                  <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      Download the binary or build from source
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <p className="font-medium">Run the server command</p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      Share the link with anyone on your network
-                    </p>
-                  </div>
-                </li>
-              </ol>
+            <div className="h-full flex flex-col justify-center">
+              <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-8 rounded-2xl shadow-lg h-full flex flex-col justify-center">
+                <h3 className="text-2xl font-bold mb-4 text-blue-700">Lightning Fast Setup</h3>
+                <ol className="space-y-4">
+                  <li className="flex gap-3">
+                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                      1
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        Download the binary or build from source
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <p className="font-medium">Run the server command</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                      3
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        Share the link with anyone on your network
+                      </p>
+                    </div>
+                  </li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
@@ -221,13 +228,13 @@ const Index: React.FC = () => {
       {/* Technical Section with Gopher */}
       <section className="py-20 bg-gray-50 relative overflow-hidden">
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-700">
             Built for Security
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-12">
             Every aspect of goLocalShare is designed with security in mind
           </p>
-          <div className="grid md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {securityFeatures.map((feature, index) => (
               <SecurityFeature
                 key={index}
@@ -266,7 +273,7 @@ const Index: React.FC = () => {
                 )
               }
               size="lg"
-              className="gap-2 bg-white text-blue-600 hover:bg-blue-50"
+              className="gap-2 bg-white text-blue-600 hover:bg-blue-50 shadow-md"
             >
               <Download size={20} />
               Download
@@ -274,7 +281,7 @@ const Index: React.FC = () => {
             <Button
               size="lg"
               variant="outline"
-              className="gap-2 border-white text-black hover:bg-white/10"
+              className="gap-2 border-white text-black hover:bg-white/10 shadow-md"
               onClick={() =>
                 window.open(`https://github.com/${githubUsername}`, "_blank")
               }
@@ -296,7 +303,6 @@ const Index: React.FC = () => {
             </div>
             <div className="text-sm">
               <p>A simple, secure file sharing solution.</p>
-              {/* <p className="mt-2">© {new Date().getFullYear()} goLocalShare</p> */}
             </div>
             <div className="flex items-center mt-6 md:mt-0">
               <Button
@@ -321,19 +327,34 @@ const Index: React.FC = () => {
 const features = [
   {
     icon: <Share2 className="h-12 w-12" />,
-    title: "Easy File Sharing",
+    title: "Easy File & Directory Sharing",
     description:
-      "Share files or directories over your local network with just one command",
+      "Share single files or entire directories over your local network with a single command.",
   },
   {
-    icon: <Shield className="h-12 w-12" />,
-    title: "Secure Authentication",
-    description: "Time-limited access tokens protect your shared content",
+    icon: <Lock className="h-12 w-12" />,
+    title: "Secure Token Authentication",
+    description: "Access is protected by a time-limited token. Only users with the correct token can browse or download files.",
   },
   {
     icon: <Clock className="h-12 w-12" />,
-    title: "Rate Limiting",
-    description: "Built-in protection against brute force attacks",
+    title: "Time-limited Session",
+    description: "Session expires automatically after the configured duration (default: 1 hour).",
+  },
+  {
+    icon: <Server className="h-12 w-12" />,
+    title: "Cloud Upload & Auto-Delete",
+    description: "Optionally upload files to Cloudinary for sharing. Files are automatically deleted from the cloud after the session ends.",
+  },
+  {
+    icon: <Server className="h-12 w-12" />,
+    title: "Security Headers",
+    description: "CSP, XSS protection, no-sniff, and other secure HTTP headers are enforced.",
+  },
+  {
+    icon: <FileText className="h-12 w-12" />,
+    title: "Path & Symlink Protection",
+    description: "Prevents directory traversal and symlink attacks. Only files within the shared path are accessible.",
   },
 ];
 
@@ -344,9 +365,10 @@ const securityFeatures = [
     title: "Authentication",
     description: "Time-limited tokens",
   },
-  { icon: <Shield />, title: "Rate Limiting", description: "100 req/min" },
-  { icon: <Database />, title: "No Size Limit", description: "Share freely" },
-  { icon: <Cpu />, title: "Lightweight", description: "Small footprint" },
+  {
+    icon: <Database />, title: "No Size Limit", description: "Share freely" },
+  {
+    icon: <Cpu />, title: "Lightweight", description: "Small footprint" },
 ];
 
 // Helper component
