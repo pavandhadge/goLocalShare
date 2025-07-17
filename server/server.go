@@ -1,8 +1,14 @@
 package server
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
 	"os"
@@ -80,11 +86,14 @@ func Start(port, basePath string, isDirMode, isCloudMode bool, shareDuration tim
 	}
 
 	// Check for cert.pem and key.pem in the current directory
-	if _, err := os.Stat("cert.pem"); os.IsNotExist(err) {
-		log.Fatal("cert.pem not found. Please generate a self-signed certificate using: openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=goFileServer'")
-	}
-	if _, err := os.Stat("key.pem"); os.IsNotExist(err) {
-		log.Fatal("key.pem not found. Please generate a self-signed certificate using: openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=goFileServer'")
+	certFile := "cert.pem"
+	keyFile := "key.pem"
+	if _, err := os.Stat(certFile); os.IsNotExist(err) || os.IsNotExist(func() error { _, err := os.Stat(keyFile); return err }()) {
+		log.Printf("cert.pem or key.pem not found, generating self-signed certificate...")
+		err := generateSelfSignedCert(certFile, keyFile)
+		if err != nil {
+			log.Fatalf("Failed to generate self-signed certificate: %v", err)
+		}
 	}
 
 	// Print startup info with token, duration, and links using the actual IP address
@@ -170,4 +179,48 @@ func openBrowser(url string) error {
 	cmd = "xdg-open"
 	args = []string{url}
 	return exec.Command(cmd, args...).Start()
+}
+
+// generateSelfSignedCert creates a self-signed certificate and key for localhost usage.
+func generateSelfSignedCert(certFile, keyFile string) error {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	tmpl := x509.Certificate{
+		SerialNumber: big.NewInt(now.UnixNano()),
+		Subject: pkix.Name{
+			Organization: []string{"goFileServer"},
+			CommonName:   "localhost",
+		},
+		NotBefore:             now.Add(-time.Hour),
+		NotAfter:              now.Add(365 * 24 * time.Hour), // valid for 1 year
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		DNSNames:              []string{"localhost"},
+	}
+	certDER, err := x509.CreateCertificate(rand.Reader, &tmpl, &tmpl, &priv.PublicKey, priv)
+	if err != nil {
+		return err
+	}
+	certOut, err := os.Create(certFile)
+	if err != nil {
+		return err
+	}
+	defer certOut.Close()
+	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certDER}); err != nil {
+		return err
+	}
+	keyOut, err := os.Create(keyFile)
+	if err != nil {
+		return err
+	}
+	defer keyOut.Close()
+	privBytes := x509.MarshalPKCS1PrivateKey(priv)
+	if err := pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: privBytes}); err != nil {
+		return err
+	}
+	return nil
 } 
